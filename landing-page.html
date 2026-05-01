@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code IL — מאפס לשליטה מלאה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:           #080812;
+      --surface:      #0e0e1c;
+      --surface-2:    #14142a;
+      --green:        #00e87a;
+      --green-dim:    rgba(0, 232, 122, 0.12);
+      --green-border: rgba(0, 232, 122, 0.28);
+      --orange:       #ff7b3a;
+      --orange-dim:   rgba(255, 123, 58, 0.12);
+      --text:         #eeeef6;
+      --text-2:       #7878a0;
+      --border:       rgba(255, 255, 255, 0.06);
+      --font:         'Heebo', sans-serif;
+      --r:            12px;
+      --r-lg:         20px;
+      --ease-out:     cubic-bezier(0.23, 1, 0.32, 1);
+      --ease-in-out:  cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    ::selection { background: var(--green); color: var(--bg); }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; inset-inline: 0;
+      z-index: 100;
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8, 8, 18, 0.82);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .logo em { color: var(--green); font-style: normal; }
+
+    .nav-btn {
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,232,122,0.35); }
+    }
+    .nav-btn:active { transform: scale(0.97); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 75% 55% at 50% -10%, rgba(0,232,122,0.13) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 40% at 85% 85%,  rgba(255,123,58,0.07) 0%, transparent 55%);
+    }
+
+    .hero-grid {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse 65% 65% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    .hero-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-text { animation: fadeUp 0.7s var(--ease-out) both; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-dim);
+      border: 1px solid var(--green-border);
+      color: var(--green);
+      padding: 5px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+      animation: fadeUp 0.7s var(--ease-out) 0.08s both;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity:1; }
+      50%      { opacity:0.25; }
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 4.8vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.035em;
+      margin-bottom: 18px;
+      animation: fadeUp 0.7s var(--ease-out) 0.16s both;
+    }
+    h1 .accent { color: var(--green); }
+
+    .hero-sub {
+      font-size: clamp(0.98rem, 1.8vw, 1.15rem);
+      color: var(--text-2);
+      line-height: 1.75;
+      margin-bottom: 36px;
+      animation: fadeUp 0.7s var(--ease-out) 0.24s both;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.7s var(--ease-out) 0.32s both;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      padding: 16px 30px;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,232,122,0.4); }
+    }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+      padding: 16px 26px;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 150ms ease, color 150ms ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-ghost:hover { border-color: rgba(255,255,255,0.14); color: var(--text); }
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 36px;
+      margin-top: 44px;
+      animation: fadeUp 0.7s var(--ease-out) 0.4s both;
+    }
+    .stat-num {
+      font-size: 1.55rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .stat-lbl {
+      font-size: 0.78rem;
+      color: var(--text-2);
+      margin-top: 4px;
+    }
+
+    /* ── TERMINAL ── */
+    .hero-terminal { animation: fadeUp 0.7s var(--ease-out) 0.28s both; }
+
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 40px 80px rgba(0,0,0,0.55),
+        0 0 60px rgba(0,232,122,0.04);
+    }
+
+    .term-bar {
+      background: var(--surface-2);
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c840; }
+    .term-title {
+      font-size: 0.72rem;
+      color: var(--text-2);
+      margin-inline-start: 10px;
+      font-family: monospace;
+    }
+
+    .term-body {
+      padding: 22px 24px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.83rem;
+      line-height: 1.85;
+      direction: ltr;
+      text-align: left;
+    }
+    .tp  { color: var(--green); }
+    .tc  { color: var(--text); }
+    .to  { color: var(--text-2); }
+    .ts  { color: var(--green); }
+    .ta  { color: var(--orange); }
+
+    .cursor {
+      display: inline-block;
+      width: 7px; height: 13px;
+      background: var(--green);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-inline-start: 1px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── SHARED ── */
+    section { padding: 100px 40px; }
+
+    .container { max-width: 1120px; margin: 0 auto; width: 100%; }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--green);
+      margin-bottom: 14px;
+    }
+
+    .sec-title {
+      font-size: clamp(1.7rem, 3.2vw, 2.7rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .sec-sub {
+      font-size: 1.05rem;
+      color: var(--text-2);
+      line-height: 1.75;
+    }
+
+    /* Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── FOR WHO ── */
+    .forwho {
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+    .forwho::after {
+      content: '';
+      position: absolute;
+      inset-inline-end: -10%;
+      top: -30%;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,232,122,0.045) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .forwho-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: end;
+      margin-bottom: 52px;
+    }
+
+    .personas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .persona {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 30px;
+      transition: border-color 200ms ease, transform 200ms var(--ease-out);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .persona:hover { border-color: var(--green-border); transform: translateY(-4px); }
+    }
+
+    .persona-icon {
+      width: 46px; height: 46px;
+      background: var(--green-dim);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 18px;
+    }
+
+    .persona h3 { font-size: 1rem; font-weight: 800; margin-bottom: 10px; }
+    .persona p  { font-size: 0.88rem; color: var(--text-2); line-height: 1.65; }
+
+    /* ── CURRICULUM ── */
+    .curriculum { position: relative; }
+
+    .curriculum-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: end;
+      margin-bottom: 52px;
+    }
+
+    .modules {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .module {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      transition: border-color 200ms ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .module:hover { border-color: rgba(0,232,122,0.2); }
+    }
+
+    .mod-num {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--green);
+      background: var(--green-dim);
+      padding: 3px 8px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .module h3 { font-size: 0.92rem; font-weight: 800; margin-bottom: 6px; }
+    .module p  { font-size: 0.82rem; color: var(--text-2); line-height: 1.5; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials {
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+    .testimonials::before {
+      content: '';
+      position: absolute;
+      inset-inline-start: -10%;
+      bottom: -20%;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,123,58,0.04) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .testi-header { text-align: center; margin-bottom: 56px; }
+    .testi-header .sec-sub { margin: 0 auto; }
+
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .testi {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 26px;
+      transition: transform 200ms var(--ease-out), border-color 200ms ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .testi:hover { transform: translateY(-3px); border-color: rgba(255,123,58,0.2); }
+    }
+
+    .stars { color: var(--orange); font-size: 0.95rem; letter-spacing: 2px; margin-bottom: 14px; }
+
+    .testi-text { font-size: 0.93rem; line-height: 1.72; margin-bottom: 20px; }
+
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .author-name { font-size: 0.88rem; font-weight: 700; }
+    .author-role { font-size: 0.78rem; color: var(--text-2); }
+
+    /* ── HOW IT WORKS ── */
+    .how { position: relative; }
+    .how-header { text-align: center; margin-bottom: 72px; }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 31px;
+      right: calc(16.66% + 24px);
+      left:  calc(16.66% + 24px);
+      height: 2px;
+      background: linear-gradient(270deg, var(--green) 0%, var(--orange) 100%);
+    }
+
+    .step { text-align: center; padding: 0 24px; }
+
+    .step-circle {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      background: var(--green-dim);
+      border: 2px solid var(--green);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 900;
+      color: var(--green);
+      margin: 0 auto 24px;
+      position: relative; z-index: 1;
+    }
+
+    .step h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 10px; }
+    .step p  { font-size: 0.88rem; color: var(--text-2); line-height: 1.65; }
+
+    /* ── FINAL CTA ── */
+    .cta-section {
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+      padding: 120px 40px;
+    }
+    .cta-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,232,122,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-box {
+      position: relative; z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--green-border);
+      border-radius: 24px;
+      padding: 64px 52px;
+      box-shadow: 0 0 80px rgba(0,232,122,0.05);
+    }
+
+    .cta-box h2 {
+      font-size: clamp(1.75rem, 3.8vw, 2.9rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .cta-box p {
+      font-size: 1.05rem;
+      color: var(--text-2);
+      line-height: 1.75;
+      margin-bottom: 36px;
+    }
+
+    .cta-fine {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 28px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .footer-logo { font-size: 0.95rem; font-weight: 900; }
+    .footer-logo em { color: var(--green); font-style: normal; }
+
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a {
+      color: var(--text-2);
+      text-decoration: none;
+      font-size: 0.83rem;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy { font-size: 0.8rem; color: var(--text-2); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .hero-inner        { grid-template-columns: 1fr; }
+      .hero-terminal     { display: none; }
+      .forwho-header     { grid-template-columns: 1fr; gap: 24px; }
+      .personas          { grid-template-columns: 1fr; }
+      .curriculum-top    { grid-template-columns: 1fr; gap: 24px; }
+      .modules           { grid-template-columns: 1fr; }
+      .testi-grid        { grid-template-columns: 1fr; }
+      .steps             { grid-template-columns: 1fr; gap: 40px; }
+      .steps::before     { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      section { padding: 64px 20px; }
+      nav     { padding: 12px 20px; }
+      .hero   { padding: 100px 20px 64px; }
+      .hero-stats { gap: 20px; }
+      .cta-box    { padding: 40px 24px; }
+      footer  { flex-direction: column; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Claude<em>Code</em> IL</div>
+    <button class="nav-btn" onclick="document.querySelector('.cta-section').scrollIntoView({behavior:'smooth'})">
+      התחל ללמוד
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+
+      <div class="hero-text">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          הקורס הראשון בעברית ל-Claude Code
+        </div>
+
+        <h1>
+          תכתוב קוד<br>
+          <span class="accent">מהיר פי 10.</span><br>
+          מהיום.
+        </h1>
+
+        <p class="hero-sub">
+          קורס Claude Code מאפס עד שליטה מלאה — ללא ניסיון קודם עם AI.
+          בשבוע הראשון תחסוך שעות. בחודש הראשון, תשנה לצמיתות את האופן שבו אתה עובד.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#cta" class="btn-primary">התחל ללמוד — בחינם</a>
+          <a href="#curriculum" class="btn-ghost">ראה את הקורס</a>
+        </div>
+
+        <div class="hero-stats">
+          <div>
+            <div class="stat-num">2,400+</div>
+            <div class="stat-lbl">לומדים פעילים</div>
+          </div>
+          <div>
+            <div class="stat-num">4.9 ★</div>
+            <div class="stat-lbl">דירוג ממוצע</div>
+          </div>
+          <div>
+            <div class="stat-num">6 מודולים</div>
+            <div class="stat-lbl">מאפס לאוטונומי</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-terminal">
+        <div class="terminal">
+          <div class="term-bar">
+            <div class="dot dot-r"></div>
+            <div class="dot dot-y"></div>
+            <div class="dot dot-g"></div>
+            <span class="term-title">claude — terminal</span>
+          </div>
+          <div class="term-body">
+            <div><span class="tp">$</span> <span class="tc">claude "בנה API לניהול משתמשים"</span></div>
+            <div class="to">⠋ מנתח את הבקשה...</div>
+            <div class="to">→ יוצר קבצי פרויקט</div>
+            <div class="to">→ כותב routes ו-middleware</div>
+            <div class="to">→ מוסיף validation ו-tests</div>
+            <div class="ts">✓ הושלם תוך 14 שניות</div>
+            <br>
+            <div><span class="tp">$</span> <span class="tc">claude "הוסף JWT authentication"</span></div>
+            <div class="to">⠋ מעדכן 4 קבצים...</div>
+            <div class="ts">✓ JWT עם refresh tokens מוכן</div>
+            <br>
+            <div><span class="tp">$</span> <span class="tc">claude "כתוב 23 tests"</span></div>
+            <div class="ta">⠋ כותב unit tests<span class="cursor"></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOR WHO -->
+  <section class="forwho">
+    <div class="container">
+      <div class="forwho-header">
+        <div class="reveal">
+          <span class="tag">בשביל מי</span>
+          <h2 class="sec-title">הקורס שמדבר<br>בדיוק אליך</h2>
+        </div>
+        <div class="reveal">
+          <p class="sec-sub">
+            לא קורס תיאורטי של עוד כלי AI. אלה שיעורים מהשטח, על פרויקטים אמיתיים,
+            שפועלים ביום שאתה לומד אותם.
+          </p>
+        </div>
+      </div>
+      <div class="personas">
+        <div class="persona reveal">
+          <div class="persona-icon">👨‍💻</div>
+          <h3>מפתח שרוצה לפרוץ קדימה</h3>
+          <p>
+            אתה כבר יודע לכתוב קוד — אבל מבלה יותר מדי זמן על boilerplate, tests ודוקומנטציה.
+            Claude Code יהפוך אותך לסניור בלי לשנות תפקיד.
+          </p>
+        </div>
+        <div class="persona reveal">
+          <div class="persona-icon">📊</div>
+          <h3>מנהל מוצר שצריך לאוטומט</h3>
+          <p>
+            אתה מבלה שעות על ייצוא דוחות, עדכוני Jira ותיעוד. עם Claude Code, תפסיק לבקש
+            מהמפתחים — ותבצע בעצמך.
+          </p>
+        </div>
+        <div class="persona reveal">
+          <div class="persona-icon">🚀</div>
+          <h3>פרילנסר שרוצה להכפיל תפוקה</h3>
+          <p>
+            כל שעת עבודה צריכה להניב תוצאות של שלוש. Claude Code הוא העוזר שלא ישן, לא מתלונן,
+            ועושה עבודה שהיית גובה עליה פי שלושה.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CURRICULUM -->
+  <section class="curriculum" id="curriculum">
+    <div class="container">
+      <div class="curriculum-top">
+        <div class="reveal">
+          <span class="tag">תוכן הקורס</span>
+          <h2 class="sec-title">מאפס לשליטה —<br>6 מודולים מעשיים</h2>
+        </div>
+        <div class="reveal">
+          <p class="sec-sub">
+            כל מודול בנוי ממשימות אמיתיות. לומדים תוך כדי עשייה — לא תיאוריה ריקה,
+            אלא קוד שרץ אצלך כבר ביום הראשון.
+          </p>
+        </div>
+      </div>
+      <div class="modules">
+        <div class="module reveal">
+          <div class="mod-num">01</div>
+          <div>
+            <h3>התקנה ראשונה תוך 10 דקות</h3>
+            <p>הגדרת סביבה, API key, ופרויקט ראשון — הכל מוכן ועובד.</p>
+          </div>
+        </div>
+        <div class="module reveal">
+          <div class="mod-num">02</div>
+          <div>
+            <h3>פקודות שחוסכות שעות</h3>
+            <p>50+ פקודות מוכנות שתשתמש בהן כל יום. מהיום הראשון.</p>
+          </div>
+        </div>
+        <div class="module reveal">
+          <div class="mod-num">03</div>
+          <div>
+            <h3>אוטומציה של תהליכים</h3>
+            <p>בניית workflows שרצים לבד — CI/CD, בדיקות, דוחות אוטומטיים.</p>
+          </div>
+        </div>
+        <div class="module reveal">
+          <div class="mod-num">04</div>
+          <div>
+            <h3>עבודה עם פרויקטים אמיתיים</h3>
+            <p>כיצד לשלב Claude בפרויקט קיים מבלי לשבור דבר.</p>
+          </div>
+        </div>
+        <div class="module reveal">
+          <div class="mod-num">05</div>
+          <div>
+            <h3>פרומפטינג מתקדם</h3>
+            <p>הטכניקות שמפיקות תוצאות של סניור — לא רק תגובות ממוצעות.</p>
+          </div>
+        </div>
+        <div class="module reveal">
+          <div class="mod-num">06</div>
+          <div>
+            <h3>בניית Agent אוטונומי</h3>
+            <p>פרויקט גמר: agent שעובד בשבילך 24 שעות, 7 ימים, ללא פיקוח.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="testi-header reveal">
+        <span class="tag">מה אומרים הלומדים</span>
+        <h2 class="sec-title">2,400 אנשים<br>כבר שינו את הדרך שלהם לעבוד</h2>
+        <p class="sec-sub">לא הבטחות. תוצאות.</p>
+      </div>
+      <div class="testi-grid">
+
+        <div class="testi reveal">
+          <div class="stars">★★★★★</div>
+          <p class="testi-text">
+            "תוך שבוע הכפלתי את מהירות הפיתוח שלי. פרויקטים שלקחו לי 3 ימים אני גומר ב-4 שעות.
+            ממש לא האמנתי שזה אפשרי עד שניסיתי."
+          </p>
+          <div class="testi-author">
+            <div class="avatar" style="background:var(--green-dim);color:var(--green)">י.ל</div>
+            <div>
+              <div class="author-name">יונתן לוי</div>
+              <div class="author-role">Full Stack Developer, Wix</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi reveal">
+          <div class="stars">★★★★★</div>
+          <p class="testi-text">
+            "אוטומטתי 3 שעות עבודה יומית תוך שבוע. עכשיו אני מגישה דוחות שלוקחות לי 10 דקות
+            במקום חצי יום. הבוס שאל אם גייסתי עוזרת."
+          </p>
+          <div class="testi-author">
+            <div class="avatar" style="background:var(--orange-dim);color:var(--orange)">מ.ר</div>
+            <div>
+              <div class="author-name">מיכל רוזנברג</div>
+              <div class="author-role">Product Manager, monday.com</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi reveal">
+          <div class="stars">★★★★★</div>
+          <p class="testi-text">
+            "כפרילנסר, עכשיו אני לוקח פרויקטים שפעם היו מחוץ לטווח שלי. הרווחתי ב-3 חודשים
+            יותר מאשר בכל השנה הקודמת. לא מגזים."
+          </p>
+          <div class="testi-author">
+            <div class="avatar" style="background:rgba(100,80,255,0.14);color:#9d8fff">ע.כ</div>
+            <div>
+              <div class="author-name">עומר כהן</div>
+              <div class="author-role">פרילנסר, אוטומציות ו-AI</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how">
+    <div class="container">
+      <div class="how-header reveal">
+        <span class="tag">איך זה עובד</span>
+        <h2 class="sec-title">שלושה צעדים.<br>שינוי קבוע.</h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-circle">1</div>
+          <h3>נרשמים תוך דקה</h3>
+          <p>הרשמה פשוטה, גישה מיידית. לא צריך כרטיס אשראי לשבוע הראשון.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-circle">2</div>
+          <h3>לומדים בקצב שלך</h3>
+          <p>שיעורים של 10–15 דקות. כל שיעור ניתן ליישם באותו יום שלמדת אותו.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-circle">3</div>
+          <h3>מיישמים ביום הראשון</h3>
+          <p>אחרי שיעור 1 כבר יש לך Claude Code מוגדר ועובד על פרויקט שלך.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="cta-section" id="cta">
+    <div class="cta-glow"></div>
+    <div class="cta-box reveal">
+      <span class="tag">הצטרף עכשיו</span>
+      <h2>עצור שנייה.<br>כמה שעות בשבוע<br>אתה יכול לחסוך?</h2>
+      <p>
+        2,400+ אנשים כבר עובדים עם Claude Code מדי יום.
+        הם לא חכמים יותר ממך — הם פשוט התחילו שבוע לפניך.
+      </p>
+      <a href="#" class="btn-primary" style="font-size:1.05rem;padding:18px 40px;">
+        אני רוצה להתחיל עכשיו — בחינם
+      </a>
+      <div class="cta-fine">
+        <span>🔒</span>
+        <span>7 ימי ניסיון בחינם · ביטול בכל עת · ללא כרטיס אשראי</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Claude<em>Code</em> IL</div>
+    <div class="footer-links">
+      <a href="#">אודות</a>
+      <a href="#">פרטיות</a>
+      <a href="#">תנאי שימוש</a>
+      <a href="#">צור קשר</a>
+    </div>
+    <div class="footer-copy">© 2026 ClaudeCode IL</div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const siblings = [...entry.target.parentElement.querySelectorAll('.reveal')];
+          const idx = siblings.indexOf(entry.target);
+          setTimeout(() => entry.target.classList.add('visible'), idx * 90);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
