@@ -1,6 +1,6 @@
-# Claude Code IL — Landing Page Builder
+# Landing Page Builder — Claude Code Skill
 
-> AI-generated, conversion-focused landing pages using Claude Code + Emil Kowalski design principles.
+A Claude Code slash command skill that generates stunning, conversion-focused landing pages through a guided intake process — with full Hebrew/RTL support and Emil Kowalski design engineering standards baked in.
 
 ---
 
@@ -8,40 +8,34 @@
 
 ### מה זה?
 
-**Claude Code IL Landing Page Builder** הוא כלי שיוצר עמודי נחיתה מקצועיים ומכווני המרה בעברית ובאנגלית — בעזרת Claude Code ועקרונות העיצוב של Emil Kowalski.
+**Landing Page Builder** הוא skill ל-Claude Code שמייצר עמודי נחיתה מקצועיים ומכווני המרה — בעברית ובאנגלית. הוא מנחה אותך שאלה-שאלה, ואז בונה קובץ HTML מלא, self-contained, שאפשר לפתוח בדפדפן ישר ולראות תוצאה מוכנה.
 
-כל עמוד נחיתה שנוצר:
-- **מותאם RTL מלא** — כולל Heebo font, כיוון נכון, ופריסה עברית מושלמת
-- **מכוון המרה** — hero, social proof, CTA, ועדויות אמיתיות
-- **עיצוב ברמת production** — Custom easing, animations מדויקות, hover states נכונים
-- **Responsive מלא** — 375px עד 1440px
+### תכונות עיקריות
 
-### שימוש
+- **תהליך intake מובנה** — שאלות אחת בכל פעם (נושא, קהל יעד, שפה, עיצוב ייחוס)
+- **תמיכה מלאה בעברית RTL** — Heebo font, כיוון נכון, כפתורים ופריסה מושלמת
+- **עיצוב ברמת Emil Kowalski** — Custom easing, hover guards, scroll reveals, reduced-motion
+- **מכוון המרה** — Hero, social proof, CTA, עדויות — הכל עם קופי אמיתי
 
-1. פתח `landing-page.html` בדפדפן
-2. ערוך את התוכן לפי הצורך
-3. שנה את הצבעים ב-CSS Custom Properties (`:root`)
-4. deploy על כל hosting סטטי (Vercel, Netlify, GitHub Pages)
+### התקנה
 
-### מה כלול
+1. העתק את `generate-landing-page.md` לתיקייה:
+   ```
+   ~/.claude/commands/
+   ```
+2. הפעל Claude Code ורשום:
+   ```
+   /generate-landing-page
+   ```
+3. עקוב אחרי ה-intake — הקובץ `landing-page.html` יווצר בתיקייה הנוכחית.
 
-```
-landing-page.html   ← עמוד נחיתה מלא, self-contained
-README.md           ← תיעוד זה
-```
+### שלבי התהליך
 
-### סטנדרטי עיצוב
-
-הדף בנוי לפי עקרונות **Emil Kowalski Design Engineering**:
-
-| עיקרון | יישום |
-|--------|-------|
-| Custom easing curves | `cubic-bezier(0.23, 1, 0.32, 1)` על כל transition |
-| Hover guards | `@media (hover: hover) and (pointer: fine)` |
-| Scroll reveals | `IntersectionObserver` עם stagger delay |
-| `prefers-reduced-motion` | ביטול אנימציות לפי הגדרת המשתמש |
-| אין `transition: all` | כל property מפורט בנפרד |
-| `:active` feedback | `scale(0.97)` על כל כפתור |
+| שלב | תיאור |
+|-----|--------|
+| **Intake** | 4 שאלות: נושא, קהל יעד, שפה, ייחוס ויזואלי |
+| **Design Direction** | Claude בוחר אסתטיקה ספציפית, לא תבנית גנרית |
+| **Build** | קובץ HTML מלא, self-contained, עם CSS ו-JS inline |
 
 ---
 
@@ -49,67 +43,76 @@ README.md           ← תיעוד זה
 
 ### What is this?
 
-**Claude Code IL Landing Page Builder** generates professional, conversion-focused landing pages in Hebrew and English — powered by Claude Code and Emil Kowalski's design engineering philosophy.
+**Landing Page Builder** is a Claude Code slash command skill that generates professional, conversion-focused landing pages through a structured intake process. It guides you question-by-question, then outputs a single self-contained HTML file — ready to open in a browser immediately.
 
-Every generated page is:
-- **Fully RTL-ready** — Hebrew Heebo font, correct directionality, proper layout flow
-- **Conversion-focused** — Hero, value prop, social proof, CTA, and testimonials
-- **Production-grade design** — Custom easing curves, precise animations, correct hover states
-- **Fully responsive** — 375px to 1440px
+### Features
 
-### Usage
+- **Structured intake** — one question at a time (subject, audience, language, visual reference)
+- **Full Hebrew / RTL support** — Heebo font, correct layout flow, RTL-safe components
+- **Emil Kowalski design standards** — custom easing curves, touch-safe hovers, scroll reveals, `prefers-reduced-motion`
+- **Conversion-focused** — real copy, specific CTAs, personas-matched value props
 
-1. Open `landing-page.html` in a browser
-2. Edit content to match your product
-3. Adjust colors via CSS Custom Properties in `:root`
-4. Deploy to any static host (Vercel, Netlify, GitHub Pages)
+### Installation
 
-### What's included
+1. Copy `generate-landing-page.md` into your Claude commands folder:
+   ```
+   ~/.claude/commands/
+   ```
+2. Open Claude Code and type:
+   ```
+   /generate-landing-page
+   ```
+3. Answer the 4 intake questions — your `landing-page.html` will be generated in the current directory.
 
-```
-landing-page.html   ← Full, self-contained landing page
-README.md           ← This file
-```
+### How It Works
+
+| Phase | Description |
+|-------|-------------|
+| **Phase 1 — Intake** | Subject, target market, language (Hebrew/English), optional reference image |
+| **Phase 2 — Design Direction** | Claude commits to a bold, specific aesthetic before writing any code |
+| **Phase 3 — Build** | Single self-contained HTML file with all CSS and JS inline |
 
 ### Design Standards Applied
 
-Built to [Emil Kowalski](https://animations.dev/) Design Engineering standards:
+Every generated page follows Emil Kowalski's design engineering philosophy:
 
-| Principle | Implementation |
-|-----------|---------------|
-| Custom easing curves | `cubic-bezier(0.23, 1, 0.32, 1)` on all transitions |
-| Touch-safe hover states | `@media (hover: hover) and (pointer: fine)` guards |
-| Scroll-triggered reveals | `IntersectionObserver` with per-sibling stagger delay |
-| Reduced motion support | Animations disabled via `prefers-reduced-motion` |
-| No `transition: all` | Every animated property explicitly named |
-| `:active` press feedback | `scale(0.97)` on all interactive elements |
+| Standard | Implementation |
+|----------|---------------|
+| Custom easing | `cubic-bezier(0.23, 1, 0.32, 1)` on all transitions |
+| Touch-safe hover | `@media (hover: hover) and (pointer: fine)` guards |
+| Scroll reveals | `IntersectionObserver` with per-sibling stagger delay |
+| Reduced motion | All animations disabled via `prefers-reduced-motion: reduce` |
+| No `transition: all` | Every animated property explicitly listed |
+| Press feedback | `scale(0.97)` `:active` on all buttons |
+| Type scaling | `clamp()` for fluid responsive headlines |
+| Hebrew fonts | Heebo, Rubik, or Assistant — never system fonts |
 
-### Tech Stack
+### Output Example
 
-- Pure HTML + CSS + vanilla JS (zero dependencies)
-- Google Fonts (Heebo — Hebrew-optimized geometric sans)
-- `IntersectionObserver` for scroll reveals
-- CSS Custom Properties for theming
+The skill produces pages with these sections (adapted per product):
 
-### Customization
+1. **Hero** — Bold headline + subheadline + primary CTA
+2. **For Who** — Persona cards speaking directly to the target audience
+3. **Curriculum / Features** — What's included, explained concisely
+4. **Social Proof** — Testimonials with names, roles, and specific outcomes
+5. **How It Works** — 3-step visual process
+6. **Final CTA** — Urgency-driven second conversion moment
+7. **Footer** — Minimal, on-brand
 
-```css
-:root {
-  --green:    #00e87a;   /* Primary accent */
-  --orange:   #ff7b3a;   /* Secondary accent */
-  --bg:       #080812;   /* Page background */
-  --surface:  #0e0e1c;   /* Card background */
-  --text:     #eeeef6;   /* Primary text */
-  --text-2:   #7878a0;   /* Secondary text */
-}
+---
+
+## File Structure
+
+```
+generate-landing-page.md   ← The skill / slash command definition
+README.md                  ← This file
 ```
 
+## Requirements
+
+- [Claude Code](https://claude.ai/code) CLI or desktop app
+- No other dependencies
+
 ---
 
-## License
-
-MIT — use freely, attribution appreciated.
-
----
-
-*Built with [Claude Code](https://claude.ai/code) · Design principles from [Emil Kowalski](https://animations.dev/)*
+*Skill built with [Claude Code](https://claude.ai/code) · Design standards from [Emil Kowalski](https://animations.dev/)*
