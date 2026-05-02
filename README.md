@@ -1,5 +1,7 @@
 # Landing Page Builder — Claude Code Skills
 
+> [🇮🇱 קרא בעברית](README.he.md)
+
 Two composable Claude Code skills for generating production-grade, conversion-focused landing pages. `generate-landing-page` handles the full build process; `emil-design-eng` is its design foundation — a standalone skill encoding Emil Kowalski's UI engineering philosophy.
 
 ---
@@ -123,12 +125,13 @@ generate-landing-page
 
 ```
 landing-page-builder/
-├── README.md
+├── README.md             ← English
+├── README.he.md          ← עברית
 └── skills/
     ├── generate-landing-page/
-    │   └── SKILL.md          ← landing page builder (references emil-design-eng)
+    │   └── SKILL.md      ← landing page builder (references emil-design-eng)
     └── emil-design-eng/
-        └── SKILL.md          ← design engineering foundation (standalone)
+        └── SKILL.md      ← design engineering foundation (standalone)
 ```
 
 ## Requirements
